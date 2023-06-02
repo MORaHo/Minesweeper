@@ -78,7 +78,7 @@ def set_board():
 pg.init()
 CLOCK = pg.time.Clock()
 screen = pg.display.set_mode((WIDTH*CELL_SIZE,HEIGHT*CELL_SIZE),0,32)
-pg.display.set_caption("Go")
+pg.display.set_caption("Minesweeper")
 
 screen.fill(base_colour)
 pg.display.flip()
