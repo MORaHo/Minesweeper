@@ -22,6 +22,7 @@ EMPTY = 0
 #pygame variables
 base_colour = (68,150,72)
 grey = (192,192,192)
+black = (0,0,0)
 lost = False
 LEFT = 1
 RIGHT = 3
@@ -82,18 +83,29 @@ pg.display.set_caption("Go")
 screen.fill(base_colour)
 pg.display.flip()
 
+for i in range(0,WIDTH+1):
+    #horizontal lines
+    pg.draw.line(screen,black,(CELL_SIZE*i,0),(i*CELL_SIZE,WIDTH*CELL_SIZE),1)
+    pg.display.flip()
+for i in range(0,HEIGHT+1):
+    #vertical lines
+    pg.draw.line(screen,black,(0,i*CELL_SIZE),(HEIGHT*CELL_SIZE,i*CELL_SIZE),1)
+    pg.display.flip()
 
 def floodfill(matrix_indices):
 
     item = worktop[matrix_indices[0]][matrix_indices[1]]
     draw(matrix_indices)
-    if item != EMPTY: return
+    if item != EMPTY:
+        checktop[matrix_indices[0]][matrix_indices[1]] = 1
+        return
     else:
         draw(matrix_indices)
         for y in range(matrix_indices[0]-1,matrix_indices[0]+2):
             for x in range(matrix_indices[1]-1,matrix_indices[1]+2):
                 if y == -1 or x == -1 or y == HEIGHT or x == WIDTH: continue
                 if checktop[y][x] != None:
+                    
                     pass
                     
                 else:
@@ -104,24 +116,24 @@ def flag(matrix_indices):
     if checktop[matrix_indices[0]][matrix_indices[1]] == None:
         path = str(10) + ".png"
         image = pg.image.load(os.path.join(__location__,"Sprites",path)).convert()
-        smol_image = pg.transform.scale(image,(CELL_SIZE,CELL_SIZE))
-        srect = smol_image.get_rect(x=(matrix_indices[1]*CELL_SIZE),y=(matrix_indices[0]*CELL_SIZE))
+        smol_image = pg.transform.scale(image,(CELL_SIZE-1,CELL_SIZE-1))
+        srect = smol_image.get_rect(x=(matrix_indices[1]*CELL_SIZE+1),y=(matrix_indices[0]*CELL_SIZE+1))
         screen.blit(smol_image,srect)
-        checktop[matrix_indices[0]][matrix_indices[1]] = 1
-    else: 
+        checktop[matrix_indices[0]][matrix_indices[1]] = "flagged"
+    elif checktop[matrix_indices[0]][matrix_indices[1]] == "flagged": 
         checktop[matrix_indices[0]][matrix_indices[1]] = None
-        pg.draw.rect(screen,base_colour,(matrix_indices[1]*CELL_SIZE,matrix_indices[0]*CELL_SIZE,CELL_SIZE,CELL_SIZE))
+        pg.draw.rect(screen,base_colour,(matrix_indices[1]*CELL_SIZE+1,matrix_indices[0]*CELL_SIZE+1,CELL_SIZE-1,CELL_SIZE-1))
 
 def draw(matrix_indices):
     root  = worktop[matrix_indices[0]][matrix_indices[1]]
-    pg.draw.rect(screen,grey,(matrix_indices[1]*CELL_SIZE,matrix_indices[0]*CELL_SIZE,CELL_SIZE,CELL_SIZE))
+    pg.draw.rect(screen,grey,(matrix_indices[1]*CELL_SIZE+1,matrix_indices[0]*CELL_SIZE+1,CELL_SIZE-1,CELL_SIZE-1))
     if root == 0:
         pass
     else:
         path = str(root) + ".png"
         image = pg.image.load(os.path.join(__location__,"Sprites",path)).convert()
-        smol_image = pg.transform.scale(image,(CELL_SIZE,CELL_SIZE))
-        srect = smol_image.get_rect(x=(matrix_indices[1]*CELL_SIZE),y=(matrix_indices[0]*CELL_SIZE))
+        smol_image = pg.transform.scale(image,(CELL_SIZE-1,CELL_SIZE-1))
+        srect = smol_image.get_rect(x=(matrix_indices[1]*CELL_SIZE+1),y=(matrix_indices[0]*CELL_SIZE+1))
         screen.blit(smol_image,srect)
 
 while not lost:
@@ -135,11 +147,11 @@ while not lost:
             if first_click:
                 empty_work_board = []
                 empty_check_board = []
-                
                 worktop = set_board()
                 checktop = form_check_board()
-                if worktop[matrix_indices[0]][matrix_indices[1]] != 0:
-                    del(worktop)
+                while worktop[matrix_indices[0]][matrix_indices[1]] != 0:
+                    empty_work_board = []
+                    worktop = []
                     worktop = set_board()
                 else:
                     first_click = False
@@ -147,7 +159,7 @@ while not lost:
                     pass
             else:
                 if event.button == LEFT:
-                    flagged = (checktop[matrix_indices[0]][matrix_indices[1]] != None)
+                    flagged = (checktop[matrix_indices[0]][matrix_indices[1]] == "flagged")
                     if worktop[matrix_indices[0]][matrix_indices[1]] == 9 and not flagged:
                         lost = True
                     if worktop[matrix_indices[0]][matrix_indices[1]] == 9 and flagged:
@@ -155,10 +167,10 @@ while not lost:
                     else:
                         floodfill(matrix_indices)
                 else:
-                    flag(matrix_indices)
-
-
-
+                    if checktop[matrix_indices[0]][matrix_indices[1]] == 1:
+                        continue
+                    else:
+                        flag(matrix_indices)
 
     pg.display.flip()
     CLOCK.tick(60)
