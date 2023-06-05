@@ -12,22 +12,25 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 DIFFICULTY = 5
 COEFFICIENT = 1/3
 MAX_DIFFICULTY = 0.14
-HEIGHT = 30
-WIDTH = 30
+HEIGHT = 15
+WIDTH = 15
 BOMB_DENSITY = MAX_DIFFICULTY/(1+math.exp(-COEFFICIENT * DIFFICULTY)) - (MAX_DIFFICULTY*math.exp(-(DIFFICULTY - math.sqrt(5))**2))
 BOMB_NUMB = int(HEIGHT * WIDTH * BOMB_DENSITY)
 CELL_SIZE = 25
 EMPTY = 0
+print(BOMB_NUMB)
 
 #pygame variables
 base_colour = (68,150,72)
 grey = (192,192,192)
 black = (0,0,0)
 lost = False
+
 LEFT = 1
 RIGHT = 3
 
 #initialize board
+flagged_numb = 0
 first_click = True
 empty_work_board = []
 empty_check_board = []
@@ -49,7 +52,7 @@ def form_board():
 def set_bombs():
     empty_bomb_board = form_board()
     bomb_list = []
-    for a in range(BOMB_NUMB):
+    for a in range(BOMB_NUMB+1):
         bomb_list.append([random.randint(0,HEIGHT-1),random.randint(0,WIDTH-1)])
     for bomb in bomb_list:
         empty_bomb_board[bomb[0]][bomb[1]] = 9
@@ -113,16 +116,21 @@ def floodfill(matrix_indices):
                     floodfill([y,x])
 
 def flag(matrix_indices):
+    global flagged_numb
+    if flagged_numb == BOMB_NUMB and ((checktop == None).any()) and checktop[matrix_indices[0]][matrix_indices[1]] != "flagged":
+        return
     if checktop[matrix_indices[0]][matrix_indices[1]] == None:
         path = str(10) + ".png"
         image = pg.image.load(os.path.join(__location__,"Sprites",path)).convert()
         smol_image = pg.transform.scale(image,(CELL_SIZE-1,CELL_SIZE-1))
         srect = smol_image.get_rect(x=(matrix_indices[1]*CELL_SIZE+1),y=(matrix_indices[0]*CELL_SIZE+1))
         screen.blit(smol_image,srect)
+        flagged_numb += 1
         checktop[matrix_indices[0]][matrix_indices[1]] = "flagged"
     elif checktop[matrix_indices[0]][matrix_indices[1]] == "flagged": 
         checktop[matrix_indices[0]][matrix_indices[1]] = None
         pg.draw.rect(screen,base_colour,(matrix_indices[1]*CELL_SIZE+1,matrix_indices[0]*CELL_SIZE+1,CELL_SIZE-1,CELL_SIZE-1))
+        flagged_numb -= 1
 
 def draw(matrix_indices):
     root  = worktop[matrix_indices[0]][matrix_indices[1]]
@@ -137,11 +145,14 @@ def draw(matrix_indices):
         screen.blit(smol_image,srect)
 
 while not lost:
+
     for event in pg.event.get():
         if event.type == pg.QUIT:
             lost = True
 
+        
         if event.type == pg.MOUSEBUTTONDOWN:
+            print(flagged_numb)
             mouse_pos = pg.mouse.get_pos()
             matrix_indices = [int(mouse_pos[1]//CELL_SIZE),int(mouse_pos[0]//CELL_SIZE)]
             if first_click:
@@ -170,7 +181,11 @@ while not lost:
                     if checktop[matrix_indices[0]][matrix_indices[1]] == 1:
                         continue
                     else:
-                        flag(matrix_indices)
+                        if flagged_numb == BOMB_NUMB and ((checktop != None).all()):
+                            print("You won!")
+                            lost = True
+                        else:
+                            flag(matrix_indices)
 
     pg.display.flip()
     CLOCK.tick(60)
