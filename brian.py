@@ -18,7 +18,6 @@ BOMB_DENSITY = MAX_DIFFICULTY/(1+math.exp(-COEFFICIENT * DIFFICULTY)) - (MAX_DIF
 BOMB_NUMB = int(HEIGHT * WIDTH * BOMB_DENSITY)
 CELL_SIZE = 25
 EMPTY = 0
-print(BOMB_NUMB)
 
 #pygame variables
 base_colour = (68,150,72)
@@ -52,10 +51,19 @@ def form_board():
 def set_bombs():
     empty_bomb_board = form_board()
     bomb_list = []
-    for a in range(BOMB_NUMB+1):
+    bombs = 0
+    for a in range(BOMB_NUMB):
+        y = random.randint(0,HEIGHT-1)
+        x = random.randint(0,WIDTH-1)
         bomb_list.append([random.randint(0,HEIGHT-1),random.randint(0,WIDTH-1)])
+        bombs += 1
     for bomb in bomb_list:
-        empty_bomb_board[bomb[0]][bomb[1]] = 9
+        y = bomb[0]
+        x = bomb[1]
+        while empty_bomb_board[y][x] == 9:
+            y = random.randint(0,HEIGHT-1)
+            x = random.randint(0,WIDTH-1)
+        empty_bomb_board[y][x] = 9
     work_board = empty_bomb_board
     return work_board
 
@@ -147,12 +155,12 @@ def draw(matrix_indices):
 while not lost:
 
     for event in pg.event.get():
+
         if event.type == pg.QUIT:
             lost = True
 
         
         if event.type == pg.MOUSEBUTTONDOWN:
-            print(flagged_numb)
             mouse_pos = pg.mouse.get_pos()
             matrix_indices = [int(mouse_pos[1]//CELL_SIZE),int(mouse_pos[0]//CELL_SIZE)]
             if first_click:
@@ -186,6 +194,9 @@ while not lost:
                             lost = True
                         else:
                             flag(matrix_indices)
+                if flagged_numb == BOMB_NUMB and ((checktop != None).all()):
+                    print("You won!")
+                    lost = True
 
     pg.display.flip()
     CLOCK.tick(60)
