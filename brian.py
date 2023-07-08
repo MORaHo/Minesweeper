@@ -12,8 +12,8 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 DIFFICULTY = 5
 COEFFICIENT = 1/3
 MAX_DIFFICULTY = 0.14
-HEIGHT = 15
-WIDTH = 15
+HEIGHT = 30
+WIDTH = 30
 BOMB_DENSITY = MAX_DIFFICULTY/(1+math.exp(-COEFFICIENT * DIFFICULTY)) - (MAX_DIFFICULTY*math.exp(-(DIFFICULTY - math.sqrt(5))**2))
 BOMB_NUMB = int(HEIGHT * WIDTH * BOMB_DENSITY)
 CELL_SIZE = 25
@@ -94,14 +94,14 @@ pg.display.set_caption("Minesweeper")
 screen.fill(base_colour)
 pg.display.flip()
 
-for i in range(0,WIDTH+1):
-    #horizontal lines
-    pg.draw.line(screen,black,(CELL_SIZE*i,0),(i*CELL_SIZE,WIDTH*CELL_SIZE),1)
-    pg.display.flip()
+for j in range(0,WIDTH+1):
+    #horizontal lines 
+    pg.draw.line(screen,black,(CELL_SIZE*j,0),(j*CELL_SIZE,WIDTH*CELL_SIZE),1)
+
 for i in range(0,HEIGHT+1):
     #vertical lines
     pg.draw.line(screen,black,(0,i*CELL_SIZE),(HEIGHT*CELL_SIZE,i*CELL_SIZE),1)
-    pg.display.flip()
+pg.display.update()
 
 def floodfill(matrix_indices):
 
