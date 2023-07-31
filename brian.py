@@ -177,7 +177,7 @@ while not lost:
                     floodfill(matrix_indices)
                     pass
             else:
-                if event.button == LEFT:
+                if event.button == LEFT: #left click
                     flagged = (checktop[matrix_indices[0]][matrix_indices[1]] == "flagged")
                     if worktop[matrix_indices[0]][matrix_indices[1]] == 9 and not flagged:
                         lost = True
@@ -185,7 +185,7 @@ while not lost:
                         continue
                     else:
                         floodfill(matrix_indices)
-                else:
+                else: #right click
                     if checktop[matrix_indices[0]][matrix_indices[1]] == 1:
                         continue
                     else:
